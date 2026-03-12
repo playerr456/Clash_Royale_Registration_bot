@@ -154,13 +154,13 @@ function validate(formData) {
   }
 
   if (crId.length <= 3) {
-    errors.crId = "CR ID должен быть длиннее 3 символов.";
+    errors.crId = "CR тэг должен быть длиннее 3 символов.";
   } else if (!crId.startsWith("#")) {
-    errors.crId = "CR ID должен начинаться с #.";
+    errors.crId = "CR тэг должен начинаться с #.";
   } else if (/[А-Яа-яЁё]/.test(crId)) {
-    errors.crId = "CR ID не должен содержать русские буквы.";
+    errors.crId = "CR тэг не должен содержать русские буквы.";
   } else if (!/^#[A-Z0-9]+$/.test(crId)) {
-    errors.crId = "CR ID может содержать только #, латиницу и цифры.";
+    errors.crId = "CR тэг может содержать только #, латиницу и цифры.";
   }
 
   if (!crNickname) {

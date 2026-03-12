@@ -75,7 +75,7 @@ module.exports = async function registerHandler(req, res) {
     `operation: ${operation}`,
     `фио: ${fullName}`,
     `номер группы: ${groupNumber}`,
-    `CR id: ${crId}`,
+    `CR тэг: ${crId}`,
     `CR nickname: ${crNickname}`,
     `timestamp: ${timestampMs}`
   ].join("\n");
@@ -92,7 +92,7 @@ module.exports = async function registerHandler(req, res) {
   try {
     await sendMessage(
       tgId,
-      `Регистрация принята.\nФИО: ${fullName}\nномер группы: ${groupNumber}\nCR id: ${crId}\nCR nickname: ${crNickname}\nВремя: ${formattedDate}`
+      `Регистрация принята.\nФИО: ${fullName}\nномер группы: ${groupNumber}\nCR тэг: ${crId}\nCR nickname: ${crNickname}\nВремя: ${formattedDate}`
     );
   } catch (_error) {
     // Ignored intentionally, registration is already saved.
