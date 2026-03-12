@@ -4,6 +4,7 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
+    "broadcast": "node scripts/broadcast.js",
     "set:webhook": "node scripts/setWebhook.js"
   },
   "dependencies": {

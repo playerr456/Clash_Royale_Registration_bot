@@ -86,6 +86,13 @@ Telegram-бот и Mini App для регистрации на турнир Clas
    - `npm run set:webhook`
    - или вызовите `GET/POST /api/set-webhook`.
 
+## Массовая рассылка
+
+- Отправить сообщение всем `tg_id` из `registrations/<tg_id>/...`:
+  - `npm run broadcast -- "123"`
+- Проверка без отправки:
+  - `npm run broadcast -- --dry-run`
+
 ## Деплой на Vercel
 
 1. Авторизуйтесь:
