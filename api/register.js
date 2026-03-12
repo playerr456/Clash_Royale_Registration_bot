@@ -25,6 +25,13 @@ function buildChannelSubscribeMarkup() {
         url: CHANNEL_URL_CR_CUP
       }
     ]);
+  } else {
+    inlineKeyboard.push([
+      {
+        text: "Присоединится к чату турнира",
+        callback_data: "join_tournament_chat"
+      }
+    ]);
   }
 
   inlineKeyboard.push([

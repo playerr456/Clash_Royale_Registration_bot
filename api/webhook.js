@@ -53,6 +53,13 @@ function buildSubscribeCheckKeyboard() {
         url: CHANNEL_URL_CR_CUP
       }
     ]);
+  } else {
+    inlineKeyboard.push([
+      {
+        text: "Присоединится к чату турнира",
+        callback_data: "join_tournament_chat"
+      }
+    ]);
   }
 
   inlineKeyboard.push([
@@ -213,6 +220,22 @@ async function handleCheckSubscription(callbackQuery) {
   await answerCallbackQuery(callbackQueryId, "Готово.");
 }
 
+async function handleJoinTournamentChat(callbackQuery) {
+  const callbackQueryId = callbackQuery?.id;
+  const chatId = callbackQuery?.message?.chat?.id;
+  if (!callbackQueryId || !chatId) {
+    return;
+  }
+
+  if (CHANNEL_URL_CR_CUP) {
+    await answerCallbackQuery(callbackQueryId, "Откройте ссылку на чат турнира.");
+    await sendMessage(chatId, `Ссылка на чат турнира: ${CHANNEL_URL_CR_CUP}`);
+    return;
+  }
+
+  await answerCallbackQuery(callbackQueryId, "Ссылка на чат турнира пока не настроена.");
+}
+
 module.exports = async function webhookHandler(req, res) {
   if (req.method === "GET") {
     return sendJson(res, 200, { ok: true, message: "Webhook is alive." });
@@ -244,6 +267,9 @@ module.exports = async function webhookHandler(req, res) {
   const callbackQuery = update?.callback_query;
   if (callbackQuery?.data === "check_subscription") {
     await handleCheckSubscription(callbackQuery);
+  }
+  if (callbackQuery?.data === "join_tournament_chat") {
+    await handleJoinTournamentChat(callbackQuery);
   }
 
   return sendJson(res, 200, { ok: true });
