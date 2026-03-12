@@ -16,6 +16,7 @@ Telegram-бот и Mini App для регистрации на турнир Clas
   - проверяет пользователя в `mephi_users.xlsx` по связке `ФИО + номер группы`;
   - сохраняет регистрацию в Vercel Blob как `<tg_id>/<timestamp>.txt`;
   - при повторной регистрации без режима редактирования возвращает ошибку `needChange=true`.
+  - по умолчанию записывает Blob с `access=public` (можно переопределить `BLOB_ACCESS=private`).
 - `/api/set-webhook`:
   - устанавливает Telegram webhook на `/api/webhook`.
 
