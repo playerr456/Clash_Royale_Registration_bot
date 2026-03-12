@@ -68,6 +68,7 @@ module.exports = async function registerHandler(req, res) {
   }
 
   const timestampMs = Date.now();
+  const formattedDate = new Date(timestampMs).toISOString().slice(0, 10).replace(/-/g, ".");
   const operation = hasExistingRegistration ? "edit" : "new";
   const content = [
     `tg id: ${tgId}`,
@@ -91,7 +92,7 @@ module.exports = async function registerHandler(req, res) {
   try {
     await sendMessage(
       tgId,
-      `Регистрация принята.\nФИО: ${fullName}\nномер группы: ${groupNumber}\nCR id: ${crId}\nCR nickname: ${crNickname}\nВремя: ${timestampMs}`
+      `Регистрация принята.\nФИО: ${fullName}\nномер группы: ${groupNumber}\nCR id: ${crId}\nCR nickname: ${crNickname}\nВремя: ${formattedDate}`
     );
   } catch (_error) {
     // Ignored intentionally, registration is already saved.
