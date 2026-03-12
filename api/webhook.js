@@ -8,7 +8,7 @@ const {
 } = require("../lib/config");
 const { getLatestRegistration, hasRegistrationFolder } = require("../lib/blob-store");
 const { methodNotAllowed, parseJsonBody, sendJson } = require("../lib/http");
-const { answerCallbackQuery, getChatMember, sendMessage } = require("../lib/telegram");
+const { answerCallbackQuery, createChatInviteLink, getChatMember, sendMessage } = require("../lib/telegram");
 
 function formatDateFromTimestamp(timestamp) {
   const numericTimestamp = Number(timestamp);
@@ -233,7 +233,27 @@ async function handleJoinTournamentChat(callbackQuery) {
     return;
   }
 
-  await answerCallbackQuery(callbackQueryId, "Ссылка на чат турнира пока не настроена.");
+  if (!CHANNEL_CHAT_ID_CR_CUP) {
+    await answerCallbackQuery(callbackQueryId, "Ссылка на чат турнира пока не настроена.");
+    return;
+  }
+
+  try {
+    const invite = await createChatInviteLink(CHANNEL_CHAT_ID_CR_CUP);
+    const inviteLink = invite?.invite_link;
+    if (!inviteLink) {
+      await answerCallbackQuery(callbackQueryId, "Не удалось получить ссылку на чат турнира.");
+      return;
+    }
+
+    await answerCallbackQuery(callbackQueryId, "Ссылка на чат турнира отправлена.");
+    await sendMessage(chatId, `Ссылка на чат турнира: ${inviteLink}`);
+  } catch (_error) {
+    await answerCallbackQuery(
+      callbackQueryId,
+      "Не удалось создать ссылку. Проверьте права бота в чате турнира."
+    );
+  }
 }
 
 module.exports = async function webhookHandler(req, res) {
