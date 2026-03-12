@@ -14,6 +14,7 @@ Telegram-бот и Mini App для регистрации на турнир Clas
   - если пользователь уже зарегистрирован, сначала показывает только кнопку `Изменить регистрацию`, без формы.
 - `/api/register`:
   - проверяет Telegram `initData` подпись;
+  - проверяет подписку пользователя на канал через `getChatMember` (по `CHANNEL_CHAT_ID`);
   - проверяет пользователя в `mephi_users.xlsx` по связке `ФИО + номер группы`;
   - сохраняет регистрацию в Vercel Blob как `registrations/<tg_id>/<timestamp>.txt`;
   - при повторной регистрации без режима редактирования возвращает ошибку `needChange=true`.
@@ -77,7 +78,8 @@ Telegram-бот и Mini App для регистрации на турнир Clas
    - `TELEGRAM_BOT_TOKEN` (или используйте локальный `bot_token.env`)
    - `BASE_URL` (например, `https://your-app.vercel.app`)
    - `BLOB_READ_WRITE_TOKEN` (из Vercel Blob)
-   - `CHANNEL_URL` (опционально, ссылка на канал для кнопки «Подписаться на канал» после регистрации; по умолчанию `https://t.me/esportsMEPHI`)
+   - `CHANNEL_URL` (опционально, ссылка на канал для кнопки подписки; по умолчанию `https://t.me/esportsMEPHI`)
+   - `CHANNEL_CHAT_ID` (опционально, `@username` или `-100...`; если не задан, пробуется автоматически из `CHANNEL_URL`)
    - `TELEGRAM_WEBHOOK_SECRET` (опционально)
    - `SET_WEBHOOK_KEY` (опционально, защита `/api/set-webhook`)
    - также поддерживаются алиасы: `TELEGRAMM_BOT_TOEN_CR_REG`, `BASE_URL_CR_REG`, `BLOB_READ_WRITE_TOKEN_CR_REG`.
@@ -93,6 +95,7 @@ Telegram-бот и Mini App для регистрации на турнир Clas
    - `vercel link`
 3. Создайте Blob Store в Vercel Dashboard и добавьте `BLOB_READ_WRITE_TOKEN` в Project Environment Variables.
 4. Добавьте остальные env-переменные (`TELEGRAM_BOT_TOKEN`, `BASE_URL` и т.д.).
+   - для проверки подписки бот должен иметь доступ к каналу (обычно добавить бота в канал администратором).
 5. Деплой:
    - `vercel --prod`
 6. После деплоя настройте webhook:

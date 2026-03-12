@@ -1,10 +1,43 @@
 const { hasRegistrationFolder, saveRegistrationFile } = require("../lib/blob-store");
-const { CHANNEL_URL } = require("../lib/config");
+const { CHANNEL_CHAT_ID, CHANNEL_URL } = require("../lib/config");
 const { studentExists } = require("../lib/excel");
 const { methodNotAllowed, parseJsonBody, sendJson } = require("../lib/http");
-const { sendMessage } = require("../lib/telegram");
+const { getChatMember, sendMessage } = require("../lib/telegram");
 const { validateRegistration } = require("../lib/validation");
 const { verifyInitData } = require("../lib/webapp-auth");
+
+function isSubscribedToChannel(chatMember) {
+  if (!chatMember || typeof chatMember.status !== "string") {
+    return false;
+  }
+
+  if (chatMember.status === "left" || chatMember.status === "kicked") {
+    return false;
+  }
+
+  if (chatMember.status === "restricted") {
+    return Boolean(chatMember.is_member);
+  }
+
+  return ["member", "administrator", "creator"].includes(chatMember.status);
+}
+
+function buildChannelSubscribeMarkup() {
+  if (!CHANNEL_URL) {
+    return undefined;
+  }
+
+  return {
+    inline_keyboard: [
+      [
+        {
+          text: "Подписаться на канал",
+          url: CHANNEL_URL
+        }
+      ]
+    ]
+  };
+}
 
 module.exports = async function registerHandler(req, res) {
   if (req.method !== "POST") {
@@ -24,6 +57,7 @@ module.exports = async function registerHandler(req, res) {
   }
 
   const tgId = String(auth.user.id);
+  const userId = Number(auth.user.id);
   const mode = payload.mode === "edit" ? "edit" : "new";
   const validation = validateRegistration(payload);
 
@@ -32,6 +66,36 @@ module.exports = async function registerHandler(req, res) {
   }
 
   const { fullName, groupNumber, crId, crNickname } = validation.value;
+
+  if (CHANNEL_CHAT_ID) {
+    let channelMember;
+    try {
+      channelMember = await getChatMember(CHANNEL_CHAT_ID, userId);
+    } catch (error) {
+      return sendJson(res, 500, {
+        ok: false,
+        error: `Не удалось проверить подписку на канал: ${error.message}`
+      });
+    }
+
+    if (!isSubscribedToChannel(channelMember)) {
+      try {
+        await sendMessage(
+          tgId,
+          "Чтобы завершить регистрацию, необходимо подписаться на канал.",
+          buildChannelSubscribeMarkup()
+        );
+      } catch (_error) {
+        // Ignore telegram send errors.
+      }
+
+      return sendJson(res, 403, {
+        ok: false,
+        needSubscribe: true,
+        error: "Чтобы завершить регистрацию, подпишитесь на канал и повторите отправку формы."
+      });
+    }
+  }
 
   let existsInUsersTable = false;
   try {
@@ -92,17 +156,7 @@ module.exports = async function registerHandler(req, res) {
   try {
     await sendMessage(
       tgId,
-      "Чтобы завершить регистрацию, необходимо подписаться на канал.",
-      {
-        inline_keyboard: [
-          [
-            {
-              text: "Подписаться на канал",
-              url: CHANNEL_URL
-            }
-          ]
-        ]
-      }
+      "Регистрация успешно завершена."
     );
   } catch (_error) {
     // Ignored intentionally, registration is already saved.
