@@ -13,22 +13,36 @@ const profanityPatterns = [
 
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 const params = new URLSearchParams(window.location.search);
-const mode = params.get("mode") === "edit" ? "edit" : "new";
+let mode = params.get("mode") === "edit" ? "edit" : "new";
 
 const form = document.getElementById("registration-form");
 const submitBtn = document.getElementById("submitBtn");
+const switchToEditBtn = document.getElementById("switchToEditBtn");
 const title = document.getElementById("title");
 const statusNode = document.getElementById("status");
 
-if (mode === "edit") {
-  title.textContent = "Изменение регистрации";
-  submitBtn.textContent = "Сохранить изменения";
+function applyMode(nextMode) {
+  mode = nextMode === "edit" ? "edit" : "new";
+
+  if (mode === "edit") {
+    title.textContent = "Изменение регистрации";
+    submitBtn.textContent = "Сохранить изменения";
+  } else {
+    title.textContent = "Регистрация";
+    submitBtn.textContent = "Отправить регистрацию";
+  }
+
+  const url = new URL(window.location.href);
+  url.searchParams.set("mode", mode);
+  window.history.replaceState({}, "", url.toString());
 }
 
 if (tg) {
   tg.ready();
   tg.expand();
 }
+
+applyMode(mode);
 
 function normalizeSpaces(value) {
   return String(value || "").trim().replace(/\s+/g, " ");
@@ -129,6 +143,41 @@ async function submitRegistration(payload) {
   return { response, data };
 }
 
+async function loadRegistrationStatus() {
+  if (!tg || !tg.initData) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/registration-status", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ initData: tg.initData })
+    });
+
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !data || !data.ok) {
+      return;
+    }
+
+    if (data.hasRegistration && mode !== "edit" && switchToEditBtn) {
+      switchToEditBtn.classList.remove("hidden");
+    }
+  } catch (_error) {
+    // Ignore status checks, the form still works.
+  }
+}
+
+if (switchToEditBtn) {
+  switchToEditBtn.addEventListener("click", () => {
+    applyMode("edit");
+    switchToEditBtn.classList.add("hidden");
+    setStatus("Режим изменения включен.", "success");
+  });
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   clearErrors();
@@ -183,7 +232,10 @@ form.addEventListener("submit", async (event) => {
     }
 
     if (data.needChange) {
-      setStatus("Вы уже зарегистрированы. Вернитесь в бот и нажмите «Изменить регистрацию».", "error");
+      if (switchToEditBtn) {
+        switchToEditBtn.classList.remove("hidden");
+      }
+      setStatus("Вы уже зарегистрированы. Нажмите «Изменить регистрацию».", "error");
       return;
     }
 
@@ -195,3 +247,5 @@ form.addEventListener("submit", async (event) => {
     submitBtn.textContent = mode === "edit" ? "Сохранить изменения" : "Отправить регистрацию";
   }
 });
+
+loadRegistrationStatus();

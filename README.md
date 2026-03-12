@@ -10,19 +10,25 @@ Telegram-бот и Mini App для регистрации на турнир Clas
   - если пользователь уже зарегистрирован в Blob, добавляет кнопку `Изменить регистрацию`.
 - `/miniapp` (Telegram WebApp):
   - форма из полей `ФИО`, `номер группы`, `CR ID`, `CR nickname`;
-  - клиентская и серверная валидации по вашим правилам.
+  - клиентская и серверная валидации по вашим правилам;
+  - если пользователь уже зарегистрирован, показывает кнопку `Изменить регистрацию`.
 - `/api/register`:
   - проверяет Telegram `initData` подпись;
   - проверяет пользователя в `mephi_users.xlsx` по связке `ФИО + номер группы`;
-  - сохраняет регистрацию в Vercel Blob как `<tg_id>/<timestamp>.txt`;
+  - сохраняет регистрацию в Vercel Blob как `registrations/<tg_id>/<timestamp>.txt`;
   - при повторной регистрации без режима редактирования возвращает ошибку `needChange=true`.
   - автоматически подбирает `access=public/private` под тип Blob Store (можно зафиксировать через `BLOB_ACCESS`).
+- `/api/registration-status`:
+  - возвращает, есть ли уже регистрация для текущего пользователя.
 - `/api/set-webhook`:
   - устанавливает Telegram webhook на `/api/webhook`.
 
 ## Структура данных в Blob
 
-`<tg_id>/<timestamp>.txt`, внутри:
+- регистрации: `registrations/<tg_id>/<timestamp>.txt`
+- база пользователей: `mephi_db/mephi_users.xlsx`
+
+Содержимое registration-файла:
 
 - `tg id`
 - `фио`
@@ -37,8 +43,8 @@ Telegram-бот и Mini App для регистрации на турнир Clas
 
 1. Оставьте файл только локально (он уже в `.gitignore`).
 2. Загрузите таблицу в private Blob:
-   - `npx vercel blob put mephi_users.xlsx --access private --pathname secure/mephi_users.xlsx --allow-overwrite true`
-3. При деплое, если локального файла нет, API автоматически читает таблицу из Blob по пути `secure/mephi_users.xlsx`.
+   - `npx vercel blob put mephi_users.xlsx --access private --pathname mephi_db/mephi_users.xlsx --allow-overwrite true`
+3. При деплое, если локального файла нет, API автоматически читает таблицу из Blob по пути `mephi_db/mephi_users.xlsx`.
 4. Если хотите другой путь, задайте env:
    - `USERS_XLSX_BLOB_PATH=<ваш/path.xlsx>`
    - `USERS_XLSX_BLOB_ACCESS=private` (или `public`).
