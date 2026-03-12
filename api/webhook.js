@@ -49,7 +49,7 @@ function buildSubscribeCheckKeyboard() {
   if (CHANNEL_URL_CR_CUP) {
     inlineKeyboard.push([
       {
-        text: "Подписаться на CR Cup",
+        text: "Присоединится к чату турнира",
         url: CHANNEL_URL_CR_CUP
       }
     ]);
