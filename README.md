@@ -59,6 +59,7 @@ Telegram-бот и Mini App для регистрации на турнир Clas
    - `BLOB_READ_WRITE_TOKEN` (из Vercel Blob)
    - `TELEGRAM_WEBHOOK_SECRET` (опционально)
    - `SET_WEBHOOK_KEY` (опционально, защита `/api/set-webhook`)
+   - также поддерживаются алиасы: `TELEGRAMM_BOT_TOEN_CR_REG`, `BASE_URL_CR_REG`, `BLOB_READ_WRITE_TOKEN_CR_REG`.
 3. Настройте webhook:
    - `npm run set:webhook`
    - или вызовите `GET/POST /api/set-webhook`.
