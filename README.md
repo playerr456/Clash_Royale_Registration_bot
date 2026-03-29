@@ -1,4 +1,4 @@
-# Clash_Royale_Registration_bot
+# @CR_rega_bot
 
 Telegram-бот и Mini App для регистрации на турнир Clash Royale.
 
